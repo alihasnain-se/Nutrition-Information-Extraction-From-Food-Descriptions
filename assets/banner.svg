@@ -1,0 +1,254 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1400" height="720" viewBox="0 0 1400 720"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Nutrition Information Extraction from Food Descriptions</title>
+  <desc id="desc">Animated visualization of recipe text flowing through embeddings and a bidirectional LSTM to produce seven nutrition predictions.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07111F"/>
+      <stop offset="55%" stop-color="#0B1D2A"/>
+      <stop offset="100%" stop-color="#06151A"/>
+    </linearGradient>
+
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2DD4BF"/>
+      <stop offset="100%" stop-color="#60A5FA"/>
+    </linearGradient>
+
+    <linearGradient id="food" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10273A"/>
+      <stop offset="100%" stop-color="#0B1B2A"/>
+    </linearGradient>
+
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#2DD4BF" stroke-opacity=".055"/>
+    </pattern>
+
+    <!-- Motion Paths -->
+    <path id="flowPathIn" d="M 370 370 C 445 370, 465 350, 525 350"/>
+    <path id="flowPathInternal1" d="M 0 0 C 65 -36, 135 -36, 205 0"/>
+    <path id="flowPathInternal2" d="M 0 0 C 65 36, 135 36, 205 0"/>
+    
+    <!-- 3 Unique Paths from Representation to Output -->
+    <path id="flowPathOut1" d="M 905 350 C 955 310, 990 280, 1040 280"/>
+    <path id="flowPathOut2" d="M 905 350 C 965 350, 985 350, 1040 350"/>
+    <path id="flowPathOut3" d="M 905 350 C 955 390, 990 420, 1040 420"/>
+
+    <style>
+      .title { font: 700 42px "Segoe UI", Arial, sans-serif; fill: #F8FAFC; letter-spacing: .2px; }
+      .subtitle { font: 400 20px "Segoe UI", Arial, sans-serif; fill: #A7C4D4; }
+      .label { font: 700 14px "Segoe UI", Arial, sans-serif; fill: #7DD3FC; letter-spacing: 2px; }
+      .panelTitle { font: 700 20px "Segoe UI", Arial, sans-serif; fill: #E6F7F3; }
+      .body { font: 400 15px "Segoe UI", Arial, sans-serif; fill: #BFD3DE; }
+      .small { font: 600 12px "Segoe UI", Arial, sans-serif; fill: #89A7B8; letter-spacing: 1px; }
+      .xsmall { font: 600 10.5px "Segoe UI", Arial, sans-serif; fill: #89A7B8; letter-spacing: 0.5px; }
+      .nutrient { font: 600 14px "Segoe UI", Arial, sans-serif; fill: #DFF8F2; }
+      .mono { font: 600 13px "DejaVu Sans Mono", monospace; fill: #A7F3D0; }
+      .stroke { stroke: #2DD4BF; stroke-opacity: .28; fill: none; stroke-width: 2; }
+      .wire { stroke: #5EEAD4; stroke-opacity: .23; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="720" rx="30" fill="url(#bg)"/>
+  <rect x="18" y="18" width="1364" height="684" rx="24" fill="url(#grid)"/>
+  <circle cx="120" cy="105" r="110" fill="#2DD4BF" opacity=".045"/>
+  <circle cx="1270" cy="610" r="180" fill="#60A5FA" opacity=".035"/>
+
+  <!-- Header -->
+  <text x="70" y="82" class="label">NLP • RECIPE UNDERSTANDING • MULTI-OUTPUT REGRESSION</text>
+  <text x="70" y="130" class="title">Nutrition Information Extraction</text>
+  <text x="70" y="165" class="subtitle">From Food Descriptions to an interpretable seven-target nutrition profile</text>
+
+  <!-- Decorative food node -->
+  <g transform="translate(1270 100)" filter="url(#softGlow)">
+    <circle cx="0" cy="0" r="31" fill="#0D2634" stroke="#2DD4BF" stroke-width="2"/>
+    <circle cx="-12" cy="-7" r="7" fill="url(#food)">
+      <animate attributeName="r" values="6;8;6" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="11" cy="-4" r="5" fill="#60A5FA"/>
+    <circle cx="2" cy="13" r="6" fill="#2DD4BF"/>
+    <path d="M-13 9 C-5 20 12 20 18 7" fill="none" stroke="#A7F3D0" stroke-width="2" stroke-linecap="round"/>
+    <animateTransform attributeName="transform" additive="sum" type="rotate"
+                      from="-3 0 0" to="3 0 0" dur="5s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- Main cards -->
+  <g>
+    <!-- Input -->
+    <rect x="70" y="220" width="300" height="330" rx="22" fill="url(#panel)" stroke="#214052" stroke-width="2"/>
+    <text x="98" y="255" class="label">INPUT</text>
+    <text x="98" y="292" class="panelTitle">Recipe text</text>
+    <text x="98" y="322" class="body">Name • ingredients • steps</text>
+    <text x="98" y="345" class="body">• description</text>
+
+    <rect x="98" y="375" width="244" height="88" rx="14" fill="#08151F" stroke="#23485B"/>
+    <text x="114" y="402" class="mono">grilled chicken</text>
+    <text x="114" y="423" class="mono">olive oil + garlic</text>
+    <text x="114" y="444" class="mono">roasted vegetables</text>
+
+    <circle cx="318" cy="287" r="8" fill="#2DD4BF" filter="url(#softGlow)">
+      <animate attributeName="opacity" values=".35;1;.35" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <text x="98" y="479" class="small">CLEAN • TOKENIZE • PAD</text>
+
+    <!-- Middle node -->
+    <rect x="525" y="220" width="380" height="330" rx="22" fill="url(#panel)" stroke="#214052" stroke-width="2"/>
+    <text x="555" y="255" class="label">REPRESENTATION + MODEL</text>
+    <text x="555" y="292" class="panelTitle">Pretrained embeddings → BiLSTM</text>
+
+    <!-- Embedding nodes -->
+    <g>
+      <rect x="548" y="330" width="102" height="44" rx="12" fill="#0D2A34" stroke="#2DD4BF" stroke-opacity=".55"/>
+      <text x="599" y="357" text-anchor="middle" class="body">GloVe</text>
+      <rect x="660" y="330" width="110" height="44" rx="12" fill="#0D2538" stroke="#60A5FA" stroke-opacity=".55"/>
+      <text x="715" y="357" text-anchor="middle" class="body">Word2Vec</text>
+      <rect x="780" y="330" width="100" height="44" rx="12" fill="#132536" stroke="#FBBF24" stroke-opacity=".55"/>
+      <text x="830" y="357" text-anchor="middle" class="body">FastText</text>
+    </g>
+
+    <!-- BiLSTM visual -->
+    <g transform="translate(610 402)">
+      <path d="M0 0 C65 -36, 135 -36, 205 0" class="wire"/>
+      <path d="M0 0 C65 36, 135 36, 205 0" class="wire"/>
+      <circle cx="0" cy="0" r="13" fill="#103D42" stroke="#2DD4BF" stroke-width="2"/>
+      <circle cx="68" cy="-22" r="13" fill="#103D42" stroke="#2DD4BF" stroke-width="2"/>
+      <circle cx="137" cy="22" r="13" fill="#103D42" stroke="#2DD4BF" stroke-width="2"/>
+      <circle cx="205" cy="0" r="16" fill="#15394A" stroke="#60A5FA" stroke-width="2"/>
+      <text x="103" y="73" text-anchor="middle" class="small">BIDIRECTIONAL SEQUENCE MODEL</text>
+
+      <circle cx="0" cy="0" r="3.5" fill="#A7F3D0">
+        <animateMotion dur="2.8s" repeatCount="indefinite">
+          <mpath xlink:href="#flowPathInternal1"/>
+        </animateMotion>
+      </circle>
+      <circle cx="0" cy="0" r="3.5" fill="#93C5FD">
+        <animateMotion dur="3.4s" repeatCount="indefinite" begin=".7s">
+          <mpath xlink:href="#flowPathInternal2"/>
+        </animateMotion>
+      </circle>
+    </g>
+
+    <text x="715" y="522" text-anchor="middle" class="xsmall">V2 • RICHER TEXT • HUBER LOSS • EMBEDDING FINE-TUNING</text>
+  </g>
+
+  <!-- Output -->
+  <g>
+    <rect x="1040" y="220" width="290" height="340" rx="22" fill="url(#panel)" stroke="#214052" stroke-width="2"/>
+    <text x="1070" y="255" class="label">OUTPUT</text>
+    <text x="1070" y="292" class="panelTitle">Nutrition profile</text>
+    <text x="1070" y="316" class="small">SEVEN PREDICTED TARGETS</text>
+
+    <g transform="translate(1070 338)">
+      <rect x="0" y="0" width="235" height="25" rx="8" fill="#102D38"/>
+      <text x="12" y="17" class="nutrient">Calories</text>
+      <circle cx="213" cy="12.5" r="5" fill="#FBBF24">
+        <animate attributeName="opacity" values=".35;1;.35" dur="2s" repeatCount="indefinite"/>
+      </circle>
+
+      <rect x="0" y="29" width="235" height="25" rx="8" fill="#102634"/>
+      <text x="12" y="46" class="nutrient">Total Fat</text>
+      <circle cx="213" cy="41.5" r="5" fill="#FB7185"/>
+
+      <rect x="0" y="58" width="235" height="25" rx="8" fill="#102D38"/>
+      <text x="12" y="75" class="nutrient">Sugar</text>
+      <circle cx="213" cy="70.5" r="5" fill="#2DD4BF"/>
+
+      <rect x="0" y="87" width="235" height="25" rx="8" fill="#102634"/>
+      <text x="12" y="104" class="nutrient">Sodium</text>
+      <circle cx="213" cy="99.5" r="5" fill="#60A5FA"/>
+
+      <rect x="0" y="116" width="235" height="25" rx="8" fill="#102D38"/>
+      <text x="12" y="133" class="nutrient">Protein</text>
+      <circle cx="213" cy="128.5" r="5" fill="#A7F3D0"/>
+
+      <rect x="0" y="145" width="235" height="25" rx="8" fill="#102634"/>
+      <text x="12" y="162" class="nutrient">Saturated Fat</text>
+      <circle cx="213" cy="157.5" r="5" fill="#FBBF24"/>
+
+      <rect x="0" y="174" width="235" height="25" rx="8" fill="#102D38"/>
+      <text x="12" y="191" class="nutrient">Carbohydrates</text>
+      <circle cx="213" cy="186.5" r="5" fill="#60A5FA"/>
+    </g>
+  </g>
+
+  <!-- Flow Wires -->
+  <path d="M370 370 C445 370 465 350 525 350" class="wire"/>
+  
+  <!-- 3 Output Connecting Wires -->
+  <path d="M 905 350 C 955 310, 990 280, 1040 280" class="wire"/>
+  <path d="M 905 350 C 965 350, 985 350, 1040 350" class="wire"/>
+  <path d="M 905 350 C 955 390, 990 420, 1040 420" class="wire"/>
+
+  <!-- Animated Data Particles -->
+  <g filter="url(#glow)">
+    <!-- Input to Representation dot -->
+    <circle r="5" fill="#A7F3D0">
+      <animateMotion dur="2.6s" repeatCount="indefinite">
+        <mpath xlink:href="#flowPathIn"/>
+      </animateMotion>
+    </circle>
+    
+    <!-- 3 Solo Dots Following Their Own Paths -->
+    <circle r="4" fill="#60A5FA">
+      <animateMotion dur="2.6s" repeatCount="indefinite">
+        <mpath xlink:href="#flowPathOut1"/>
+      </animateMotion>
+    </circle>
+    
+    <circle r="4" fill="#FBBF24">
+      <animateMotion dur="2.6s" repeatCount="indefinite">
+        <mpath xlink:href="#flowPathOut2"/>
+      </animateMotion>
+    </circle>
+    
+    <circle r="4" fill="#FB7185">
+      <animateMotion dur="2.6s" repeatCount="indefinite">
+        <mpath xlink:href="#flowPathOut3"/>
+      </animateMotion>
+    </circle>
+  </g>
+
+  <!-- Bottom strip -->
+  <g transform="translate(70 585)">
+    <rect x="0" y="0" width="1260" height="80" rx="20" fill="#081720" stroke="#1B3A49"/>
+    <text x="30" y="28" class="label">PIPELINE</text>
+    <text x="30" y="54" class="body">Food.com → preprocessing → embeddings → BiLSTM → seven nutrition predictions → Gradio</text>
+
+    <g transform="translate(1015 39)">
+      <circle cx="0" cy="0" r="6" fill="#2DD4BF"/>
+      <circle cx="24" cy="0" r="6" fill="#60A5FA"/>
+      <circle cx="48" cy="0" r="6" fill="#FBBF24"/>
+      <circle cx="72" cy="0" r="6" fill="#FB7185"/>
+      <circle cx="96" cy="0" r="6" fill="#A7F3D0"/>
+      <animateTransform attributeName="transform" type="translate"
+                        additive="sum" values="0 0; -8 0; 0 0" dur="2.5s" repeatCount="indefinite"/>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <text x="70" y="681" class="small">PYTHON • TENSORFLOW • KERAS • GENSIM • TRANSFORMERS • GRADIO • JUPYTER</text>
+  <text x="1330" y="681" text-anchor="end" class="small">NLP REGRESSION</text>
+</svg>

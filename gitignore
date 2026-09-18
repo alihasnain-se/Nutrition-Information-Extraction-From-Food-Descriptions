@@ -1,0 +1,35 @@
+# Raw / processed data (download separately from Kaggle)
+*.csv
+data/
+RAW_recipes.csv
+RAW_interactions.csv
+
+# Trained models & large artifacts (100MB+ each — use Releases / Git LFS / HF Hub instead)
+*.keras
+*.h5
+*.npy
+embedding_matrix_*
+
+# Tokenizers / scalers / configs generated at runtime (small, but regenerable — optional to track)
+*.pkl
+
+# Colab / Drive
+drive/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gradio
+gradio_cached_examples/
+flagged/
